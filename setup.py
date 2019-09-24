@@ -24,7 +24,7 @@ setup(
     version=__version__,
     description="flask-casbin-redis-watcher",
     long_description=long_description,
-    python_requires=">3.5"
+    python_requires=">3.5",
     url="https://github.com/sciencelogic/flask-casbin-redis-watcher",
     download_url="https://github.com/sciencelogic/flask-casbin-redis-watcher/tarball/" + __version__,
     license="MIT",
