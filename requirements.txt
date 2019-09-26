@@ -1,2 +1,2 @@
 redis
-flask-casbin
+flask-casbin==0.1.1
