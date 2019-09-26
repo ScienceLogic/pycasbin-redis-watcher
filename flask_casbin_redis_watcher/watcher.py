@@ -28,7 +28,7 @@ class RedisWatcher(Watcher):
         self.parent_conn, child_conn = Pipe()
         self.subscribed_process = Process(target=redis_casbin_subscription,
                                           args=(redis_host, child_conn,
-                                                redis_port))
+                                                redis_port), daemon=True)
         if start_process:
             self.subscribed_process.start()
 
