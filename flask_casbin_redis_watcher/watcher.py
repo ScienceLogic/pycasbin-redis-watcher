@@ -1,4 +1,5 @@
 from redis import Redis
+from flask-casbin import Watcher
 from multiprocessing import Process, Pipe
 import time
 
@@ -19,7 +20,7 @@ def redis_casbin_subscription(redis_url, process_conn, redis_port=None):
 
 
 
-class RedisWatcher(object):
+class RedisWatcher(Watcher):
 
     def __init__(self, redis_host, redis_port=None):
         self.redis_url = redis_host
@@ -41,11 +42,11 @@ class RedisWatcher(object):
         r.publish(REDIS_CHANNEL_NAME, 'casbin policy'
                                       ' updated at {}'.format(time.time()))
 
-    def try_reload(self):
+    def should_reload(self):
         try:
             if self.parent_conn.poll():
                 message = self.parent_conn.recv()
-                self.update_callback()
+                return True
         except EOFError:
             print("Child casbin-watcher subscribe prococess has stopped")
             return False
