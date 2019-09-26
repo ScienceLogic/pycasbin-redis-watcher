@@ -1,5 +1,5 @@
 from redis import Redis
-from flask-casbin import Watcher
+from flask_casbin import Watcher
 from multiprocessing import Process, Pipe
 import time
 
@@ -22,14 +22,15 @@ def redis_casbin_subscription(redis_url, process_conn, redis_port=None):
 
 class RedisWatcher(Watcher):
 
-    def __init__(self, redis_host, redis_port=None):
+    def __init__(self, redis_host, redis_port=None, start_process=True):
         self.redis_url = redis_host
         self.redis_port = redis_port
         self.parent_conn, child_conn = Pipe()
         self.subscribed_process = Process(target=redis_casbin_subscription,
                                           args=(redis_host, child_conn,
                                                 redis_port))
-        self.subscribed_process.start()
+        if start_process:
+            self.subscribed_process.start()
 
     def set_update_callback(self, fn):
         self.update_callback = fn
