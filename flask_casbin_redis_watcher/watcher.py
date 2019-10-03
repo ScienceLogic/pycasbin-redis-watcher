@@ -5,7 +5,10 @@ import time
 
 REDIS_CHANNEL_NAME = "casbin-role-watcher"
 
-def redis_casbin_subscription(redis_url, process_conn, redis_port=None):
+def redis_casbin_subscription(redis_url, process_conn, redis_port=None,
+                              delay=0):
+    # in case we want to delay connecting to redis (redis connection failure)
+    time.sleep(delay)
     r = Redis(redis_url, redis_port)
     p = r.pubsub()
     p.subscribe(REDIS_CHANNEL_NAME)
@@ -25,12 +28,17 @@ class RedisWatcher(Watcher):
     def __init__(self, redis_host, redis_port=None, start_process=True):
         self.redis_url = redis_host
         self.redis_port = redis_port
-        self.parent_conn, child_conn = Pipe()
-        self.subscribed_process = Process(target=redis_casbin_subscription,
-                                          args=(redis_host, child_conn,
-                                                redis_port), daemon=True)
+        self.subscribed_process, self.parent_conn = \
+            self.create_subscriber_process(start_process)
+
+    def create_subscriber_process(self, start_process=True, delay=0):
+        parent_conn, child_conn = Pipe()
+        p = Process(target=redis_casbin_subscription,
+                    args=(self.redis_url, child_conn, self.redis_port, delay),
+                    daemon=True)
         if start_process:
-            self.subscribed_process.start()
+            p.start()
+        return p, parent_conn
 
     def set_update_callback(self, fn):
         self.update_callback = fn
@@ -49,5 +57,8 @@ class RedisWatcher(Watcher):
                 message = self.parent_conn.recv()
                 return True
         except EOFError:
-            print("Child casbin-watcher subscribe prococess has stopped")
+            print("Child casbin-watcher subscribe prococess has stopped, "
+                  "attempting to recreate the process in 10 seconds...")
+            self.subscribed_process, self.parent_conn = \
+                self.create_subscriber_process(delay=10)
             return False
