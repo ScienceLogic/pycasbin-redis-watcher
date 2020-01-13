@@ -13,13 +13,29 @@ def redis_casbin_subscription(redis_url, process_conn, redis_port=None,
     p = r.pubsub()
     p.subscribe(REDIS_CHANNEL_NAME)
     print("Waiting for casbin policy updates...")
-    while True:
+    while True and r:
         # wait 20 seconds to see if there is a casbin update
-        message = p.get_message(timeout=20)
+        try:
+            message = p.get_message(timeout=20)
+        except Exception as e:
+            print("Casbin watcher failed to get message from redis due to: {}"
+                  .format(repr(e)))
+            p.close()
+            r = None
+            break
+
         if message and message.get('type') == "message":
             print("Casbin policy update identified.."
                   " Message was: {}".format(message))
-            process_conn.send(message)
+            try:
+                process_conn.send(message)
+            except Exception as e:
+                print("Casbin watcher failed sending update to piped"
+                      " process due to: {}".format(repr(e)))
+                p.close()
+                r = None
+                break
+
 
 
 
