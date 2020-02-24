@@ -8,6 +8,7 @@ pip install flask-casbin-redis-watcher
 ```
 
 ### Basic Usage
+Example used along with https://github.com/ScienceLogic/flask-casbin
 ```
 from flask_casbin import CasbinEnforcer
 from flask_casbin_redis_watcher import RedisWatcher
