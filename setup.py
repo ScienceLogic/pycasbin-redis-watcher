@@ -22,6 +22,7 @@ dependency_links = [
 setup(
     name="pycasbin-redis-watcher",
     version=__version__,
+    long_description_content_type="text/markdown",
     description="Redis watcher adapter for pycasbin",
     long_description=long_description,
     python_requires=">3.5",
