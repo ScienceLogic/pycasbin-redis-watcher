@@ -1,5 +1,4 @@
 from redis import Redis
-from flask_casbin import Watcher
 from multiprocessing import Process, Pipe
 import time
 
@@ -37,10 +36,7 @@ def redis_casbin_subscription(redis_url, process_conn, redis_port=None,
                 break
 
 
-
-
-class RedisWatcher(Watcher):
-
+class RedisWatcher(object):
     def __init__(self, redis_host, redis_port=None, start_process=True):
         self.redis_url = redis_host
         self.redis_port = redis_port

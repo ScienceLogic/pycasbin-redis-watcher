@@ -1,17 +1,17 @@
-# Flask-Casbin-Redis-Watcher
+# pycasbin redis watcher
 
 Casbin role watcher to be used for monitoring updates to casbin policies
 
 ### Installation
 ```
-pip install flask-casbin-redis-watcher
+pip install pycasbin-redis-watcher
 ```
 
 ### Basic Usage
-Example used along with https://github.com/ScienceLogic/flask-casbin
+Example used along with https://github.com/ScienceLogic/pycasbin/flask-authz
 ```
-from flask_casbin import CasbinEnforcer
-from flask_casbin_redis_watcher import RedisWatcher
+from flask_authz import CasbinEnforcer
+from casbin_redis_watcher import RedisWatcher
 casbin_enforcer = CasbinEnforcer(app, adapter)
 watcher=RedisWatcher(redis_hostname, redis_port)
 watcher.set_update_callback(casbin_enforcer.e.load_policy)
