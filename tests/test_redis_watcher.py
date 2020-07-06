@@ -35,7 +35,7 @@ def fake_redis_server():
 
 @pytest.fixture
 def redis_watcher(fake_redis, fake_redis_server):
-    from flask_casbin_redis_watcher import RedisWatcher
+    from casbin_redis_watcher import RedisWatcher
     rw = RedisWatcher(redis_host=fake_redis_server, redis_port=2000,
                       start_process=False)
     return rw
@@ -52,9 +52,9 @@ def test_update(redis_watcher, fake_redis):
     # subscribe(). No obvious way to mock this call without undertsanding deep
     # redis pubsub.publish, pubsub._socket, etc. I've maade an attempt but
     # unfortunately was unable to get a full test.
-    #import flask_casbin_redis_watcher
+    #import casbin_redis_watcher
     #Redis = fake_redis
-    #flask_casbin_redis_watcher.Redis = fake_redis
+    #casbin_redis_watcher.Redis = fake_redis
     #redis_watcher.update()
     #assert redis_watcher.should_reload()
     pass
