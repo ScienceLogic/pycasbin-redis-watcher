@@ -8,7 +8,7 @@ pip install pycasbin-redis-watcher
 ```
 
 ### Basic Usage
-Example used along with https://github.com/ScienceLogic/pycasbin/flask-authz
+Example used along with https://github.com/pycasbin/flask-authz
 ```
 from flask_authz import CasbinEnforcer
 from casbin_redis_watcher import RedisWatcher
