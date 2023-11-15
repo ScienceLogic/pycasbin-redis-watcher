@@ -6,34 +6,39 @@ REDIS_CHANNEL_NAME = "casbin-role-watcher"
 
 def redis_casbin_subscription(redis_url, process_conn, redis_port=None,
                               delay=0):
-    # in case we want to delay connecting to redis (redis connection failure)
+    # In case we want to delay connecting to redis (redis connection failure)
     time.sleep(delay)
-    r = Redis(redis_url, redis_port)
-    p = r.pubsub()
-    p.subscribe(REDIS_CHANNEL_NAME)
-    print("Waiting for casbin policy updates...")
-    while True and r:
-        # wait 20 seconds to see if there is a casbin update
-        try:
-            message = p.get_message(timeout=20)
-        except Exception as e:
-            print("Casbin watcher failed to get message from redis due to: {}"
-                  .format(repr(e)))
-            p.close()
-            r = None
-            break
-
-        if message and message.get('type') == "message":
-            print("Casbin policy update identified.."
-                  " Message was: {}".format(message))
+    try:
+        r = Redis(redis_url, redis_port)
+        p = r.pubsub()
+        p.subscribe(REDIS_CHANNEL_NAME)
+    except Exception as e:
+        print("Casbin Redis watcher failed to subscribe to the channel {} due to: {}"
+                .format(REDIS_CHANNEL_NAME, repr(e)))
+    else:
+        print("Waiting for casbin policy updates...")
+        while True and r:
+            # wait 20 seconds to see if there is a casbin update
             try:
-                process_conn.send(message)
+                message = p.get_message(timeout=20)
             except Exception as e:
-                print("Casbin watcher failed sending update to piped"
-                      " process due to: {}".format(repr(e)))
+                print("Casbin watcher failed to get message from redis due to: {}"
+                    .format(repr(e)))
                 p.close()
                 r = None
                 break
+
+            if message and message.get('type') == "message":
+                print("Casbin policy update identified.."
+                    " Message was: {}".format(message))
+                try:
+                    process_conn.send(message)
+                except Exception as e:
+                    print("Casbin watcher failed sending update to piped"
+                        " process due to: {}".format(repr(e)))
+                    p.close()
+                    r = None
+                    break
 
 
 class RedisWatcher(object):
@@ -69,7 +74,7 @@ class RedisWatcher(object):
                 message = self.parent_conn.recv()
                 return True
         except EOFError:
-            print("Child casbin-watcher subscribe prococess has stopped, "
+            print("Child casbin-watcher subscribe process has stopped, "
                   "attempting to recreate the process in 10 seconds...")
             self.subscribed_process, self.parent_conn = \
                 self.create_subscriber_process(delay=10)
